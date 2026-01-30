@@ -29,35 +29,36 @@ class BookingController extends AbstractController
             // DECODIFICAR JSON
             $data = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                return $this->json(['error' => 'Formato JSON inválido'], 400);
+                return $this->json(['code' => 400, 'description' => 'Formato JSON inválido'], 400);
             }
 
             $clientId = $data['client_id'] ?? null;
             $activityId = $data['activity_id'] ?? null;
 
             if (!$clientId || !$activityId) {
-                return $this->json(['error' => 'Faltan datos: client_id y activity_id son obligatorios'], 400);
+                return $this->json(['code' => 400, 'description' => 'Faltan datos: client_id y activity_id son obligatorios'], 400);
             }
 
             // BUSCAR ENTIDADES
             $client = $this->clientRepo->find($clientId);
             $activity = $this->activityRepo->find($activityId);
 
-            if (!$client) return $this->json(['error' => 'El cliente no existe'], 404);
-            if (!$activity) return $this->json(['error' => 'La actividad no existe'], 404);
+            if (!$client) return $this->json(['code' => 404, 'description' => 'El cliente no existe'], 404);
+            if (!$activity) return $this->json(['code' => 404, 'description' => 'La actividad no existe'], 404);
 
             foreach ($client->getBookings() as $existingBooking) {
                 // Comparamos IDs. Si ya tiene una reserva con el mismo ID de actividad...
                 if ($existingBooking->getActivity()->getId() === $activity->getId()) {
                     return $this->json([
-                        'error' => 'Este cliente ya tiene una reserva activa para esta misma actividad'
+                        'code' => 400,
+                        'description' => 'Este cliente ya tiene una reserva activa para esta misma actividad'
                     ], 400);
                 }
             }
 
             // VALIDAR AFORO (PLAZAS)
             if ($activity->getBookings()->count() >= $activity->getMaxParticipants()) {
-                return $this->json(['error' => 'La actividad está completa, no hay plazas'], 400);
+                return $this->json(['code' => 400, 'description' => 'La actividad está completa, no hay plazas'], 400);
             }
 
             // VALIDAR RESTRICCIÓN STANDARD (2 por semana)
@@ -79,7 +80,8 @@ class BookingController extends AbstractController
 
                 if ($reservasSemana >= 2) {
                     return $this->json([
-                        'error' => 'Límite alcanzado: Los usuarios Standard solo pueden reservar 2 actividades por semana'
+                        'code' => 400,
+                        'description' => 'Límite alcanzado: Los usuarios Standard solo pueden reservar 2 actividades por semana'
                     ], 400);
                 }
             }
@@ -97,7 +99,7 @@ class BookingController extends AbstractController
             return $this->json($dto, 200);
 
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Error interno', 'details' => $e->getMessage()], 500);
+            return $this->json(['code' => 500, 'description' => 'Error interno'], 500);
         }
     }
 }

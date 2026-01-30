@@ -37,6 +37,9 @@ class ActivityController extends AbstractController
             // Convertimos a boolean: false solo si enviaron "false" o "0", sino true por defecto
             $onlyFree = !($onlyFreeParam === 'false' || $onlyFreeParam === '0');
 
+            // Contar total de registros antes de filtrar por paginación
+            $countQb = $this->repo->createQueryBuilder('a_count');
+            
             // Construir la consulta
             $qb = $this->repo->createQueryBuilder('a'); // 'a' es el alias de Activity
 
@@ -46,6 +49,8 @@ class ActivityController extends AbstractController
                 if (ActivityType::tryFrom($type) !== null) {
                     $qb->andWhere('a.type = :type')
                         ->setParameter('type', $type);
+                    $countQb->andWhere('a_count.type = :type')
+                        ->setParameter('type', $type);
                 }
             }
 
@@ -54,6 +59,9 @@ class ActivityController extends AbstractController
             $orderSql = strtolower($order) === 'asc' ? 'ASC' : 'DESC';
             $qb->orderBy('a.' . $sortField, $orderSql);
 
+
+            // Obtener total de items
+            $totalItems = (int) $countQb->select('COUNT(a_count.id)')->getQuery()->getSingleScalarResult();
 
             // Paginación
             $qb->setFirstResult(($page - 1) * $pageSize)
@@ -82,7 +90,7 @@ class ActivityController extends AbstractController
                 'meta' => [
                     'page' => $page,
                     'limit' => $pageSize,
-                    'total-items' => count($data)
+                    'total-items' => $totalItems
                 ]
             ], 200);
 
@@ -90,7 +98,8 @@ class ActivityController extends AbstractController
             // Manejo de errores
         } catch (\Throwable $e) {
             return $this->json([
-                'error' => 'Error interno del servidor al recuperar actividades',
+                'code' => 500,
+                'description' => 'Error interno del servidor al recuperar actividades',
             ], 500);
         }
     }

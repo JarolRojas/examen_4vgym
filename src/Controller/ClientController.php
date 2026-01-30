@@ -21,7 +21,7 @@ class ClientController extends AbstractController
         try {
             $client = $this->clientRepo->find($id);
             if (!$client) {
-                return $this->json(['error' => 'Cliente no encontrado'], 404);
+                return $this->json(['code' => 404, 'description' => 'Cliente no encontrado'], 404);
             }
 
             $wBookingsParam = $request->query->get('with_bookings');
@@ -56,10 +56,10 @@ class ClientController extends AbstractController
                     $minutes = $durationSecs / 60;
 
                     if (!isset($tempStats[$year])) $tempStats[$year] = [];
-                    if (!isset($tempStats[$year][$type])) $tempStats[$year][$type] = ['num_activities' => 0, 'num_minutes' => 0];
+                    if (!isset($tempStats[$year][$type])) $tempStats[$year][$type] = ['num_activities' => '0', 'num_minutes' => '0'];
 
-                    $tempStats[$year][$type]['num_activities']++;
-                    $tempStats[$year][$type]['num_minutes'] += $minutes;
+                    $tempStats[$year][$type]['num_activities'] = (string)((int)$tempStats[$year][$type]['num_activities'] + 1);
+                    $tempStats[$year][$type]['num_minutes'] = (string)((int)$tempStats[$year][$type]['num_minutes'] + $minutes);
                 }
 
                 $statsOutput = [];
@@ -76,7 +76,7 @@ class ClientController extends AbstractController
             return $this->json($dto);
 
         } catch (\Exception $e) {
-            return $this->json(['error' => 'Error interno', 'details' => $e->getMessage()], 500);
+            return $this->json(['code' => 500, 'description' => 'Error interno'], 500);
         }
     }
 }
