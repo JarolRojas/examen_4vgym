@@ -1,9 +1,3 @@
-¡Claro que sí! Un buen **README.md** es el broche de oro para un examen. Demuestra profesionalidad, orden y ayuda al profesor a corregir sin tener que adivinar cómo funciona tu código.
-
-Aquí tienes un README profesional, estructurado y detallando todas las decisiones técnicas "Top" que hemos tomado (DTOs, Fixtures, Enums, etc.).
-
-Crea un archivo llamado `README.md` en la raíz de tu proyecto y pega esto:
-
 ---
 
 ```markdown
