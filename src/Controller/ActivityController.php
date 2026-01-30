@@ -29,13 +29,13 @@ class ActivityController extends AbstractController
 
             $type = $request->query->get('type');
 
-            $sort = $request->query->get('sort', 'date_start');
-            $order = $request->query->get('order', 'asc');
+            $sort = $request->query->get('sort', 'date');
+            $order = $request->query->get('order', 'desc');
 
-            // El usuario puede enviar "true", "1", o nada.
+            // El usuario puede enviar "false", "0", o nada.
             $onlyFreeParam = $request->query->get('onlyfree');
-            // Convertimos a boolean: true si enviaron "true" o "1"
-            $onlyFree = ($onlyFreeParam === 'true' || $onlyFreeParam === '1');
+            // Convertimos a boolean: false solo si enviaron "false" o "0", sino true por defecto
+            $onlyFree = !($onlyFreeParam === 'false' || $onlyFreeParam === '0');
 
             // Construir la consulta
             $qb = $this->repo->createQueryBuilder('a'); // 'a' es el alias de Activity
@@ -49,8 +49,8 @@ class ActivityController extends AbstractController
                 }
             }
 
-            // Ordenar por
-            $sortField = ($sort === 'participants') ? 'max_participants' : 'date_start';
+            // Ordenar por - solo se permite 'date' según OpenAPI
+            $sortField = 'date_start';  // Solo permitimos ordenar por fecha
             $orderSql = strtolower($order) === 'asc' ? 'ASC' : 'DESC';
             $qb->orderBy('a.' . $sortField, $orderSql);
 
@@ -69,7 +69,7 @@ class ActivityController extends AbstractController
 
                 // Filtro 'onlyfree' usando los datos del DTO
                 if ($onlyFree) {
-                    if ($dto->clients_signed >= $dto->participants_max) {
+                    if ($dto->clients_signed >= $dto->max_participants) {
                         continue;
                     }
                 }
@@ -82,7 +82,7 @@ class ActivityController extends AbstractController
                 'meta' => [
                     'page' => $page,
                     'limit' => $pageSize,
-                    'count' => count($data)
+                    'total-items' => count($data)
                 ]
             ], 200);
 

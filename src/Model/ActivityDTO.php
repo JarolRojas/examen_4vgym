@@ -9,7 +9,7 @@ class ActivityDTO
     public function __construct(
         public int $id,
         public string $type,
-        public int $participants_max,
+        public int $max_participants,
         public int $clients_signed,
         public string $date_start,
         public string $date_end,

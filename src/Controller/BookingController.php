@@ -94,7 +94,7 @@ class BookingController extends AbstractController
             $this->em->flush();
 
             $dto = BookingResponseDTO::fromEntity($booking, 'Reserva creada con éxito');
-            return $this->json($dto, 201);
+            return $this->json($dto, 200);
 
         } catch (\Exception $e) {
             return $this->json(['error' => 'Error interno', 'details' => $e->getMessage()], 500);

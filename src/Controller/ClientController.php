@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\ClientRepository;
 use App\DTO\ClientDTO; // <--- IMPORTANTE
+use App\DTO\ActivityDTO; // <--- NUEVO IMPORT
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,7 @@ class ClientController extends AbstractController
 {
     public function __construct(private ClientRepository $clientRepo) {}
 
-    #[Route('/{id}', methods: ['GET'])]
+    #[Route('/{id}', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(int $id, Request $request): JsonResponse
     {
         try {
@@ -36,9 +37,8 @@ class ClientController extends AbstractController
                 foreach ($client->getBookings() as $b) {
                     $bookingsData[] = [
                         'id' => $b->getId(),
-                        'activity_id' => $b->getActivity()->getId(),
-                        'activity_type' => $b->getActivity()->getType()->value,
-                        'date' => $b->getActivity()->getDateStart()->format('Y-m-d H:i')
+                        'activity' => ActivityDTO::fromEntity($b->getActivity()),
+                        'client_id' => $b->getClient()->getId()
                     ];
                 }
             }
