@@ -1,5 +1,3 @@
----
-
 ```markdown
 # 🏋️‍♂️ Gym Management API - Examen Symfony
 
@@ -16,8 +14,6 @@ API RESTful desarrollada con Symfony para la gestión de un gimnasio. El sistema
     * **DataFixtures** para la carga inicial de datos.
     * Manejo de errores robusto con bloques `try-catch` y respuestas JSON estandarizadas.
     * Validaciones de negocio complejas (fechas, aforo, duplicados).
-
----
 
 ## ⚙️ Instalación y Configuración
 
