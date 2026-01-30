@@ -30,8 +30,8 @@ class ActivityDTO
             $activity->getType()->value,
             $activity->getMaxParticipants(),
             $signedCount,
-            $activity->getDateStart()->format('c'),
-            $activity->getDateEnd()->format('c'),
+            $activity->getDateStart()->format('Y-m-d H:i:s'),
+            $activity->getDateEnd()->format('Y-m-d H:i:s'),
             $playlistDTOs
         );
     }

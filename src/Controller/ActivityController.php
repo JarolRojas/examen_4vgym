@@ -37,19 +37,13 @@ class ActivityController extends AbstractController
             // Convertimos a boolean: false solo si enviaron "false" o "0", sino true por defecto
             $onlyFree = !($onlyFreeParam === 'false' || $onlyFreeParam === '0');
 
-            // Contar total de registros antes de filtrar por paginación
-            $countQb = $this->repo->createQueryBuilder('a_count');
-            
             // Construir la consulta
             $qb = $this->repo->createQueryBuilder('a'); // 'a' es el alias de Activity
-
 
             // Filtro por tipo de actividad
             if ($type) {
                 if (ActivityType::tryFrom($type) !== null) {
-                    $qb->andWhere('a.type = :type')
-                        ->setParameter('type', $type);
-                    $countQb->andWhere('a_count.type = :type')
+                    $qb->andWhere('a.Activity = :type')
                         ->setParameter('type', $type);
                 }
             }
@@ -58,10 +52,6 @@ class ActivityController extends AbstractController
             $sortField = 'date_start';  // Solo permitimos ordenar por fecha
             $orderSql = strtolower($order) === 'asc' ? 'ASC' : 'DESC';
             $qb->orderBy('a.' . $sortField, $orderSql);
-
-
-            // Obtener total de items
-            $totalItems = (int) $countQb->select('COUNT(a_count.id)')->getQuery()->getSingleScalarResult();
 
             // Paginación
             $qb->setFirstResult(($page - 1) * $pageSize)
@@ -90,7 +80,7 @@ class ActivityController extends AbstractController
                 'meta' => [
                     'page' => $page,
                     'limit' => $pageSize,
-                    'total-items' => $totalItems
+                    'total-items' => count($data)
                 ]
             ], 200);
 
@@ -99,8 +89,8 @@ class ActivityController extends AbstractController
         } catch (\Throwable $e) {
             return $this->json([
                 'code' => 500,
-                'description' => 'Error interno del servidor al recuperar actividades',
-            ], 500);
+                'description' => 'Error interno del servidor al recuperar actividades'
+            ], 400);
         }
     }
 }
